@@ -31,12 +31,6 @@ def clamp(value: int, minimum: int = 0, maximum: int = 100) -> int:
     return max(minimum, min(maximum, value))
 
 
-def decimal_or_none(value):
-    if value is None:
-        return None
-    return Decimal(str(round(float(value), 6)))
-
-
 def signal_label(final_score: int, risk_score: int, missing_data: bool) -> str:
     if missing_data:
         return "Manual Review"
@@ -136,7 +130,7 @@ def main():
             missing_data = snapshot is None or fetch_failed
             if snapshot is None:
                 score_date = pd.Timestamp.today().date()
-                values = [None] * 16
+                values = [None] * 15
             else:
                 score_date = snapshot[0]
                 values = list(snapshot[1:])
@@ -148,7 +142,6 @@ def main():
             ma50 = number(ma50)
             ma200 = number(ma200)
             rsi14 = number(rsi14)
-            avg_volume20 = number(avg_volume20)
             volume_ratio = number(volume_ratio)
             distance_high = number(distance_high)
             latest_volume = int(latest_bar[0]) if latest_bar and latest_bar[0] is not None else None

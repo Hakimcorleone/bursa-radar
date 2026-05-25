@@ -1,4 +1,3 @@
-import type { Awaited } from "react";
 import { RadioTower } from "lucide-react";
 import type { getStockDetail } from "@/lib/data/queries";
 import { formatDateTime, formatPercent, formatPrice, formatVolume } from "@/lib/format";

@@ -1,4 +1,3 @@
-import type { Awaited } from "react";
 import type { getStockDetail } from "@/lib/data/queries";
 import { RetroPanel } from "@/components/ui/RetroPanel";
 import { StatMeter } from "@/components/ui/StatMeter";
