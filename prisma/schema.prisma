@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Stock {
+  id                 String              @id @default(cuid())
+  symbol             String              @unique
+  yahooSymbol        String              @unique
+  companyName        String
+  sector             String?
+  market             String              @default("Bursa Malaysia")
+  isActive           Boolean             @default(true)
+  fetchFailed        Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  priceBars          PriceBar[]
+  indicatorSnapshots IndicatorSnapshot[]
+  dailyScores        DailyScore[]
+  watchlistItem      WatchlistItem?
+  announcements      Announcement[]
+  journalEntries     PersonalJournal[]
+}
+
+model PriceBar {
+  id            String   @id @default(cuid())
+  stockId       String
+  stock         Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  open          Decimal? @db.Decimal(18, 6)
+  high          Decimal? @db.Decimal(18, 6)
+  low           Decimal? @db.Decimal(18, 6)
+  close         Decimal  @db.Decimal(18, 6)
+  adjustedClose Decimal? @db.Decimal(18, 6)
+  volume        BigInt?
+  createdAt     DateTime @default(now())
+
+  @@unique([stockId, date])
+  @@index([date])
+}
+
+model IndicatorSnapshot {
+  id                  String   @id @default(cuid())
+  stockId             String
+  stock               Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  date                DateTime @db.Date
+  close               Decimal? @db.Decimal(18, 6)
+  dailyChange         Decimal? @db.Decimal(18, 6)
+  dailyChangePercent  Decimal? @db.Decimal(18, 6)
+  ma20                Decimal? @db.Decimal(18, 6)
+  ma50                Decimal? @db.Decimal(18, 6)
+  ma200               Decimal? @db.Decimal(18, 6)
+  rsi14               Decimal? @db.Decimal(18, 6)
+  avgVolume20         Decimal? @db.Decimal(18, 6)
+  volumeRatio         Decimal? @db.Decimal(18, 6)
+  high52w             Decimal? @db.Decimal(18, 6)
+  low52w              Decimal? @db.Decimal(18, 6)
+  distanceFrom52wHigh Decimal? @db.Decimal(18, 6)
+  priceAboveMa20      Boolean?
+  priceAboveMa50      Boolean?
+  priceAboveMa200     Boolean?
+  createdAt           DateTime @default(now())
+
+  @@unique([stockId, date])
+  @@index([date])
+}
+
+model DailyScore {
+  id             String   @id @default(cuid())
+  stockId        String
+  stock          Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  date           DateTime @db.Date
+  momentumScore  Int
+  volumeScore    Int
+  trendScore     Int
+  riskScore      Int
+  stabilityScore Int
+  finalScore     Int
+  signalLabel    String
+  reason         String
+  riskFlags      Json?
+  createdAt      DateTime @default(now())
+
+  @@unique([stockId, date])
+  @@index([date])
+  @@index([signalLabel])
+}
+
+model WatchlistItem {
+  id           String   @id @default(cuid())
+  stockId      String   @unique
+  stock        Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  watchStatus  String   @default("On Radar")
+  personalNote String?
+  priority     Int      @default(3)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Announcement {
+  id               String   @id @default(cuid())
+  stockId          String
+  stock            Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  announcementDate DateTime @db.Date
+  title            String
+  category         String?
+  url              String?
+  rawText          String?
+  sentimentLabel   String?
+  catalystScore    Int?
+  createdAt        DateTime @default(now())
+
+  @@index([announcementDate])
+}
+
+model PersonalJournal {
+  id        String   @id @default(cuid())
+  stockId   String
+  stock     Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  tag       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
