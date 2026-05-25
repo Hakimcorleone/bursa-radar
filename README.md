@@ -27,7 +27,35 @@ The data pipeline stores daily OHLCV bars, calculates indicator snapshots, and g
 
 `yfinance` / Yahoo data may be delayed, incomplete, adjusted, or unavailable. It is not an official Bursa Malaysia feed and should be treated as personal research/project data only. Bursa Console is a personal watchlist dashboard, not financial advice.
 
-## Setup
+## Vercel + Supabase Deployment
+
+Set these environment variables in Vercel Project Settings:
+
+```env
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+MARKET_DATA_PROVIDER="yfinance"
+DEFAULT_HISTORY_PERIOD="1y"
+MIN_VOLUME_THRESHOLD="100000"
+```
+
+Use the Supabase Transaction Pooler URL for Vercel because Vercel functions are serverless. Keep the database URL secret.
+
+Vercel environment variables only apply to Vercel. To run the database setup and data refresh workflows from GitHub, add the same `DATABASE_URL` as a GitHub repository secret:
+
+1. GitHub repository -> Settings -> Secrets and variables -> Actions.
+2. New repository secret.
+3. Name: `DATABASE_URL`.
+4. Value: the Supabase transaction pooler URL.
+
+Then run:
+
+1. GitHub -> Actions -> Setup Supabase Database -> Run workflow.
+2. GitHub -> Actions -> Refresh Bursa Market Data -> Run workflow.
+3. Vercel -> Deployments -> Redeploy.
+
+The refresh workflow also runs on weekdays at `10:30 UTC`, which is `18:30` in Malaysia/Singapore time.
+
+## Local Setup
 
 1. Install Node dependencies:
 

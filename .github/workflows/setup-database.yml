@@ -1,0 +1,31 @@
+name: Setup Supabase Database
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MARKET_DATA_PROVIDER: yfinance
+      DEFAULT_HISTORY_PERIOD: 1y
+      MIN_VOLUME_THRESHOLD: 100000
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Push Prisma schema
+        run: npm run db:push
+
+      - name: Seed Bursa stocks
+        run: npm run db:seed

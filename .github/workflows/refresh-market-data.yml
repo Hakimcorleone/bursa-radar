@@ -1,0 +1,38 @@
+name: Refresh Bursa Market Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 10 * * 1-5"
+
+jobs:
+  refresh-market-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MARKET_DATA_PROVIDER: yfinance
+      DEFAULT_HISTORY_PERIOD: 1y
+      MIN_VOLUME_THRESHOLD: 100000
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh prices, indicators, and scores
+        run: npm run refresh:data
